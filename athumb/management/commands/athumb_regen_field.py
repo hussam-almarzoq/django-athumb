@@ -40,6 +40,11 @@ class Command(BaseCommand):
         # String field name to re-generate.
         self.field = self.args[1]
 
+    def list_generator(self, qs, cnt, limit=100):
+        for i in xrange(0, cnt, limit):
+            for item in qs[i:i+limit]:
+                yield item
+
     def regenerate_thumbs(self):
         """
         Handle re-generating the thumbnails. All this involves is reading the
@@ -49,9 +54,7 @@ class Command(BaseCommand):
         Model = self.model
         instances = Model.objects.all()
         num_instances = instances.count()
-        # Filenames are keys in here, to help avoid re-genning something that
-        # we have already done.
-        regen_tracker = {}
+        instances = self.list_generator(instances, num_instances)
 
         counter = 1
         for instance in instances:
@@ -64,15 +67,6 @@ class Command(BaseCommand):
                 continue
 
             file_name = os.path.basename(file.name)
-
-            if regen_tracker.has_key(file_name):
-                print "(%d/%d) ID: %d -- Skipped -- Already re-genned %s" % (
-                                                    counter,
-                                                    num_instances,
-                                                    instance.id,
-                                                    file_name)
-                counter += 1
-                continue
 
             # Keep them informed on the progress.
             print "(%d/%d) ID: %d -- %s" % (counter, num_instances,
@@ -115,5 +109,4 @@ class Command(BaseCommand):
                 counter += 1
                 continue
 
-            regen_tracker[file_name] = True
             counter += 1
