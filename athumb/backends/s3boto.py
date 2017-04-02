@@ -231,10 +231,6 @@ class S3BotoStorage(Storage):
                                             force_http=self.force_no_ssl,
                                             response_headers=response_headers)
 
-    def get_available_name(self, name, max_length=None):
-        """ Overwrite existing file with the same name. """
-        name = self._clean_name(name)
-        return name
 
 
 class S3BotoStorage_AllPublic(S3BotoStorage):
